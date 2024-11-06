@@ -1,4 +1,4 @@
-﻿using DTO_demo.DTO;
+﻿using AutoMapper;
 using DTO_demo.Mappings;
 using DTO_demo.Models;
 using Microsoft.AspNetCore.Http;
@@ -11,9 +11,12 @@ namespace DTO_demo.Controllers
     public class BooksController : ControllerBase
     {
         private readonly MyDbContext _context;
-        public BooksController(MyDbContext context)
+        private readonly IMapper _mapper;
+
+        public BooksController(MyDbContext context , IMapper mapper)
         {
             _context = context; 
+            _mapper = mapper;
             
         }
 
@@ -23,13 +26,22 @@ namespace DTO_demo.Controllers
             List<Book> books = _context.Books.ToList();
             if(books != null)
             {
-                List<BookDTO> bookDTOs = books.ToDTOList();
-                return bookDTOs;
+                List<BookDTO> bookDtos = _mapper.Map<List<BookDTO>>(books);
+                return bookDtos;
             }
             else
             {
                 return NotFound();
             }
+        }
+
+        [HttpPost]
+        public ActionResult PostBook(BookDTO bookDTO)
+        {
+            var book = _mapper.Map<Book>(bookDTO);
+            _context.Books.Add(book);
+            _context.SaveChanges();
+            return CreatedAtAction(nameof(PostBook), new { id = book.Id }, bookDTO);
         }
     }
 }

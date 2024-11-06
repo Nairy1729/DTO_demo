@@ -13,4 +13,5 @@
         public string? Genre { get; set; }
 
     }
+    public record BookDTO(int Id , string Title , string Author , decimal Price);
 }
